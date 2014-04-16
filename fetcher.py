@@ -8,6 +8,7 @@ import datetime
 from gzip import GzipFile
 import socket
 import sys
+import random
 
 socket.setdefaulttimeout(3) #设置5秒后连接超时
 
@@ -66,7 +67,7 @@ class fetcher:
             self.lock.release()
             self.q_req.task_done() #req finish
             #sys.stderr.write("myId:%d\tOut lock to put ans\n"%(myId))
-            time.sleep(5)
+            time.sleep(random.randint(5, 10))
 
     def get(self,myId,req,opener,retries=3):
         try:

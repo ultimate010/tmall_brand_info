@@ -121,7 +121,7 @@ def _genLevelSecond(fet , urls,thirdfile):
 #                   raw_input()
                     yield str
             except Exception as err:
-                fthree.write("%s\tERRO\n" % (url))
+                fthree.write("%s\tPASERERR\n" % (url))
                 sys.stderr.write("%s:%s\t%s\n" % (datetime.datetime.now(),url , err))
 
     except Exception as err:
