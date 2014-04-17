@@ -6,7 +6,9 @@ from fetcher import fetcher
 import sys
 import lxml.html as H
 import re
+import requests
 from pyhelper import pyhelper_add_helper, pyhelper_main
+import random
 
 threadsNum = 4
 
@@ -88,29 +90,19 @@ def _genLevelSecond(fet , urls,thirdfile):
             did = pindustryid.findall(url)
             cid = pcategoryid.findall(url)
             eid = petgid.findall(url)
-            #print content
             ans = pye.findall(content)
-    #        print did[0]
-    #        print cid[0]
-    #        print eid[0]
             if(len(ans) > 0):
                 fthree.write("%s\t%s\n" % (url , ans[0]))
             else:
                 fthree.write("%s\tERRO\n" % (url))
 
             fet.taskleft() #watch ans
-#            print content
             dom_lei = H.fromstring(content)
 
             logourls = dom_lei.xpath(BRAND_LOGO_XPATH)
             brandurls = dom_lei.xpath(BRAND_URL_XPATH)
             titles = dom_lei.xpath(BRAND_TITLE_XPATH)
             dess = dom_lei.xpath(BRAND_DESC_XPATH)
-#            print brandurls[0]
-#            print titles[0]
-#            print dess[0]
-#            print logourls[0]
-#            raw_input()
             if (len(brandurls) == 0):
                 sys.stderr.write("%s:Can not paser %s\n" % (datetime.datetime.now(),url))
             str = ''
@@ -118,12 +110,71 @@ def _genLevelSecond(fet , urls,thirdfile):
                 for i , _url  in enumerate(brandurls):
                     bid = pbrandid.findall(_url)
                     str = titles[i] + "\t" + dess[i] + "\t" + bid[0] + "\t" + cid[0] + "\t" + _url + "\t" + logourls[i]
-#                   raw_input()
                     yield str
             except Exception as err:
                 fthree.write("%s\tPASERERR\n" % (url))
                 sys.stderr.write("%s:%s\t%s\n" % (datetime.datetime.now(),url , err))
 
+    except Exception as err:
+        sys.stderr.write("%s:%s\n" % (datetime.datetime.now(),err))
+
+@pyhelper_add_helper
+def genLevelThree(threeLevelUrlsFile , outFile , failfiles):
+    f = fetcher(threads=threadsNum)
+    with open(threeLevelUrlsFile , 'r') as fi:
+        urls = fi.readlines()
+        urls = map (lambda x: x.strip("\r\n") , urls)
+        ans = _genLevelThree(f,urls,failfiles)
+    fout = open(outFile , 'w')
+    for  url in ans:
+        fout.write("%s\n" % url.encode('utf-8' , 'ignore'))
+
+def _genLevelThree(fet , lines ,thirdfile):
+    try:
+        fthree = open(thirdfile , 'w')
+        urls = []
+        pages = []
+        for l in lines:
+            [u , p] = l.split('\t')
+            urls.append(u)
+            pages.append(p)
+        pindustryid = re.compile(PATTERN_INDID , re.M)
+        pcategoryid = re.compile(PATTERN_CATID , re.M)
+        petgid = re.compile(PATTERN_ETID , re.M)
+        pbrandid = re.compile(PATTERN_BRANDID , re.M)
+        for k , _url in enumerate(urls):
+            sys.stderr.write("Doing %d:%s\n"%(k,_url))
+            did = pindustryid.findall(_url)
+            cid = pcategoryid.findall(_url)
+            eid = petgid.findall(_url)
+            form = {}
+            for j  in range(1 , int(pages[k]) + 1):
+                form = {
+                        'page' : str(j), 'industryId' : str(did),
+                        'categoryId' : str(cid), 'etgId' : str(eid),
+                        'tagValueId' : '' , 'rankType' : '1'
+                       }
+                r = requests.post(_url,params = form)
+#                print r.text
+#                raw_input()
+                time.sleep(random.randint(5, 10))
+                dom_lei = H.fromstring(r.text)
+                logourls = dom_lei.xpath(BRAND_LOGO_XPATH)
+                brandurls = dom_lei.xpath(BRAND_URL_XPATH)
+                titles = dom_lei.xpath(BRAND_TITLE_XPATH)
+                dess = dom_lei.xpath(BRAND_DESC_XPATH)
+                if (len(brandurls) == 0):
+                    fthree.write("%s\t%d\n" % (_url,j))
+                    sys.stderr.write("%s:Can not paser %s\n" % (datetime.datetime.now(),_url))
+                mystr = ''
+                try:
+                    for i , burl  in enumerate(brandurls):
+                        bid = pbrandid.findall(burl)
+                        mystr = titles[i] + "\t" + dess[i] + "\t" + bid[0] + "\t" + cid[0] + "\t" + burl + "\t" + logourls[i]
+                        yield mystr
+                except Exception as err:
+                    fthree.write("%s\t%d\n" % (_url,j))
+                    sys.stderr.write("%s:%s\t%s\n" % (datetime.datetime.now(),_url , err))
     except Exception as err:
         sys.stderr.write("%s:%s\n" % (datetime.datetime.now(),err))
 

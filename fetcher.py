@@ -71,7 +71,7 @@ class fetcher:
 
     def get(self,myId,req,opener,retries=3):
         try:
-            headers_template = {
+            headers_template = [{
                             'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
                             'Accept-Charset': 'UTF-8,*;q=0.5',
                             'Accept-Encoding': 'gzip,deflate,sdch',
@@ -80,8 +80,44 @@ class fetcher:
                             'Connection': 'keep-alive',
                             'Host': 'brand.tmall.com',
                             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.24',
-            }
-            (resp_headers , data) = opener.request(req , "GET" , headers = headers_template ,  redirections = 10)
+            },{
+                            'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+                            'Accept-Charset': 'UTF-8,*;q=0.5',
+                            'Accept-Encoding': 'gzip,deflate,sdch',
+                            'Accept-Language': 'zh-CN,zh;q=0.8',
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Host': 'brand.tmall.com',
+                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36',
+            },{
+                            'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+                            'Accept-Charset': 'UTF-8,*;q=0.5',
+                            'Accept-Encoding': 'gzip,deflate,sdch',
+                            'Accept-Language': 'zh-CN,zh;q=0.8',
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Host': 'brand.tmall.com',
+                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:28.0) Gecko/20100101 Firefox/28.0',
+            },{
+                            'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+                            'Accept-Charset': 'UTF-8,*;q=0.5',
+                            'Accept-Encoding': 'gzip,deflate,sdch',
+                            'Accept-Language': 'zh-CN,zh;q=0.8',
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Host': 'brand.tmall.com',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 4.1) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.24',
+            },{
+                            'Accept': 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+                            'Accept-Charset': 'UTF-8,*;q=0.5',
+                            'Accept-Encoding': 'gzip,deflate,sdch',
+                            'Accept-Language': 'zh-CN,zh;q=0.8',
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Host': 'brand.tmall.com',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 3.1) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.24',
+            }]
+            (resp_headers , data) = opener.request(req , "GET" , headers = headers_template[random.randint(0,4)] ,  redirections = 10)
 #            print data
         except Exception , what:
             if retries>0:
