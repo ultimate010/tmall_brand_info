@@ -119,22 +119,27 @@ def _genLevelSecond(fet , urls,thirdfile):
         sys.stderr.write("%s:%s\n" % (datetime.datetime.now(),err))
 
 @pyhelper_add_helper
-def genLevelThree(threeLevelUrlsFile , outFile , failfiles):
+def genLevelThree(threeLevelUrlsFile , outFile , failfiles , skipNum):
     f = fetcher(threads=threadsNum)
     with open(threeLevelUrlsFile , 'r') as fi:
         urls = fi.readlines()
         urls = map (lambda x: x.strip("\r\n") , urls)
-        ans = _genLevelThree(f,urls,failfiles)
+        ans = _genLevelThree(f,urls,failfiles , skipNum)
     fout = open(outFile , 'w')
     for  url in ans:
         fout.write("%s\n" % url.encode('utf-8' , 'ignore'))
 
-def _genLevelThree(fet , lines ,thirdfile):
+def _genLevelThree(fet , lines ,thirdfile , skipNum):
     try:
         fthree = open(thirdfile , 'w')
         urls = []
         pages = []
+        ccc = 0
         for l in lines:
+            ccc += 1
+            if(ccc < int(skipNum)):
+                #raw_input()
+                continue
             [u , p] = l.split('\t')
             urls.append(u)
             pages.append(p)
@@ -143,7 +148,7 @@ def _genLevelThree(fet , lines ,thirdfile):
         petgid = re.compile(PATTERN_ETID , re.M)
         pbrandid = re.compile(PATTERN_BRANDID , re.M)
         for k , _url in enumerate(urls):
-            sys.stderr.write("Doing %d:%s\n"%(k,_url))
+            sys.stderr.write("Doing %d:%s\n"%(int(k + int(skipNum)),_url))
             did = pindustryid.findall(_url)
             cid = pcategoryid.findall(_url)
             eid = petgid.findall(_url)
@@ -154,7 +159,7 @@ def _genLevelThree(fet , lines ,thirdfile):
                         'categoryId' : str(cid), 'etgId' : str(eid),
                         'tagValueId' : '' , 'rankType' : '1'
                        }
-                r = requests.post(_url,params = form)
+                r = requests.post(_url,params = form,timeout = 5)
 #                print r.text
 #                raw_input()
                 time.sleep(random.randint(5, 10))
@@ -176,6 +181,7 @@ def _genLevelThree(fet , lines ,thirdfile):
                     fthree.write("%s\t%d\n" % (_url,j))
                     sys.stderr.write("%s:%s\t%s\n" % (datetime.datetime.now(),_url , err))
     except Exception as err:
+        fthree.write("%s\t%d\n" % (_url,j))
         sys.stderr.write("%s:%s\n" % (datetime.datetime.now(),err))
 
 
